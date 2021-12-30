@@ -28,7 +28,7 @@ chmod +x start_make.sh && ./start_make.sh
 
 # 安装WSL镜像
 
-> 用于安装 WSL 镜像的 Windows 10 必须高于 `2004` 版本。需要开启 Windows 功能【适用于 Linux 的 Windows 子系统】，若想启用WSL2则还需开启【虚拟机容器】。
+> 用于安装 WSL 镜像的 Windows 10 必须高于 `2004` 版本。需要开启 Windows 功能【适用于 Linux 的 Windows 子系统】，若想启用WSL2则还需开启【虚拟机平台】。
 
 ![2.png](pic/2.png)
 
