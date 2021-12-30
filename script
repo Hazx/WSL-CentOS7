@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# 更换 yum 源
+mkdir /etc/yum.repos.d/bk
+mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bk/
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+curl -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
+yum makecache
+
+# 调整时区
+yum install -y tzdata
+\cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+# 更新和安装组件
+yum update -y
+## 基础组件
+yum install -y openssl vim wget zip unzip git lsof net-tools psmisc zlib gzip expect bind-utils lrzsz screen
+## 扩展组件
+yum install -y dnf
+dnf install -y dnf-plugins-core
+dnf copr -y enable konimex/neofetch
+dnf install -y neofetch
+## Docker cli
+yum install -y yum-utils device-mapper-persistent-data lvm2
+yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum install -y docker-ce-cli
+echo -e "export DOCKER_HOST=tcp://127.0.0.1:2375\n" >> /root/.bashrc
+
+# 中文支持
+yum install -y kde-l10n-Chinese
+yum reinstall -y glibc-common
+localedef -c -f UTF-8 -i zh_CN zh_CN.utf8
+cat <<EOF > /etc/locale.conf
+LANG=zh_CN.UTF-8
+LC_ALL=zh_CN.UTF-8
+EOF
+
+# 清理
+yum clean all
+dnf clean all
+
+# 替换 systemctl
+mv /usr/bin/systemctl /usr/bin/systemctl.bk
+curl https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py > /usr/bin/systemctl
+if [ "$?" != 0 ];then
+    exit 1
+fi
+chmod +x /usr/bin/systemctl
