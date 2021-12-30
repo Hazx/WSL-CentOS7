@@ -25,6 +25,7 @@ mkdir imagebase
 tar xvf save_make.tar -C ./imagebase/
 cd imagebase
 rm -f ./script.sh
+rm -f ../rootfs.tar.gz
 tar zcvf ../rootfs.tar.gz ./*
 cd ..
 
