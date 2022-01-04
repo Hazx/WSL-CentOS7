@@ -7,10 +7,12 @@ if [[ $(id -u) -ne 0 ]];then
     exit 1
 fi
 # 构建 Dockerfile
-echo -e "FROM ${base_img}\n\n" > ./Dockerfile
-echo -e "ADD script /script.sh\n" >> ./Dockerfile
-echo -e "RUN chmod +x /script.sh && /script.sh\n" >> ./Dockerfile
-echo -e "CMD /usr/sbin/init" >> ./Dockerfile
+cat <<EOF >> ./Dockerfile
+FROM ${base_img}
+ADD script /script.sh
+RUN chmod +x /script.sh && /script.sh
+CMD /usr/sbin/init
+EOF
 
 # 构建镜像
 docker pull ${base_img}
@@ -18,7 +20,8 @@ docker build -t hazx_make_tmp:wslcentos .
 if [ "$?" != 0 ];then
     exit 1
 fi
-docker run -d --privileged --name save_make hazx_make_tmp:wslcentos
+docker run -d --privileged --name save_make hazx_make_tmp:wslcentos /usr/sbin/init
+docker exec save_make localedef -c -f UTF-8 -i zh_CN zh_CN.utf8
 docker stop save_make
 docker export -o save_make.tar save_make
 mkdir imagebase
