@@ -2,10 +2,25 @@
 
 # 更换 yum 源
 mkdir /etc/yum.repos.d/bk
-mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bk/
-curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
-curl -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
+## 更换为阿里云镜像源
+# mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bk/
+# curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+# curl -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
+# yum makecache
+## 更换为北京外国语大学镜像源
+cp /etc/yum.repos.d/*.repo /etc/yum.repos.d/bk/
+sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+    -e 's|^#baseurl=http://mirror.centos.org|baseurl=https://mirrors.bfsu.edu.cn|g' \
+    -i /etc/yum.repos.d/CentOS-*.repo
 yum makecache
+yum install epel-release -y
+sed -e 's!^metalink=!#metalink=!g' \
+    -e 's!^#baseurl=!baseurl=!g' \
+    -e 's!//download\.fedoraproject\.org/pub!//mirrors.bfsu.edu.cn!g' \
+    -e 's!//download\.example/pub!//mirrors.bfsu.edu.cn!g' \
+    -e 's!http://mirrors!https://mirrors!g' \
+    -i /etc/yum.repos.d/epel*.repo
+yum makecache fast
 
 # 调整时区
 yum install -y tzdata
@@ -14,7 +29,7 @@ yum install -y tzdata
 # 更新和安装组件
 yum update -y
 ## 基础组件
-yum install -y openssl vim wget zip unzip git lsof net-tools psmisc zlib gzip expect bind-utils lrzsz screen
+yum install -y openssl vim wget zip unzip git lsof net-tools psmisc zlib gzip expect bind-utils lrzsz screen sudo
 ## 扩展组件
 yum install -y dnf
 dnf install -y dnf-plugins-core
@@ -23,6 +38,9 @@ dnf install -y neofetch
 ## Docker cli
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+# 替换为北京外国语大学镜像源
+sudo sed -i 's+aliyun.com+bfsu.edu.cn+' /etc/yum.repos.d/docker-ce.repo
+yum makecache fast
 yum install -y docker-ce-cli
 echo -e "export DOCKER_HOST=tcp://127.0.0.1:2375\n" >> /root/.bashrc
 
